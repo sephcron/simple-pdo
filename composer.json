@@ -2,6 +2,12 @@
     "name": "sephcron/simplepdo",
     "description": "Simplifica a utilização da biblioteca PDO",
     "require": {
-        "php": "^7.0"
+        "php": "^7.0",
+        "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": { 
+            "Sephcron\\PDO\\": "src/"
+        }
     }
 }
