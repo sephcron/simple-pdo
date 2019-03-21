@@ -1,0 +1,7 @@
+{
+    "name": "sephcron/simplepdo",
+    "description": "Simplifica a utilização da biblioteca PDO",
+    "require": {
+        "php": "^7.0"
+    }
+}
