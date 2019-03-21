@@ -1,6 +1,6 @@
 <?php
 
-namespace LIB\PDO;
+namespace Sephcron\PDO;
 
 use PDOStatement;
 
