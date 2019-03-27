@@ -84,6 +84,9 @@ class SimplePDO
 
     public function executeMultiple(string $sql, array $params)
     {
+        if (!$params)
+            return;
+        
         $stmt = $this->connect()->prepare($sql);
 
         foreach ($params as $param_array)
@@ -102,11 +105,7 @@ class SimplePDO
     
     public function updateMultiple(string $sql, array $params)
     {
-        $this->connect();
-        
-        //$this->pdo->beginTransaction();
         $this->executeMultiple($sql, $params);
-        //$this->pdo->commit();
     }
     
     public function executeProcedure(string $name, array $params)
