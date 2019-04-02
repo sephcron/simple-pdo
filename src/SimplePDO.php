@@ -151,27 +151,27 @@ class SimplePDO
     
     public function queryAll(string $sql, array $params = null)
     {
-        return $this->query($sql, $params)->fetchAll() ?: null;
+        return $this->query($sql, $params)->fetchAll() ?: [];
     }
     
     public function queryAllIndexed(string $sql, array $params = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: null;
+        return $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: [];
     }
     
     public function queryAllGroup(string $sql, array $params = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_GROUP) ?: null;
+        return $this->query($sql, $params)->fetchAll(PDO::FETCH_GROUP) ?: [];
     }
     
     public function queryColumn(string $sql, array $params = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: null;
+        return $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: [];
     }
     
     public function queryColumnIndexed(string $sql, array $params = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: null;
+        return $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
     }
     
     public function utilIndexByColumn(array &$result, string $column)
