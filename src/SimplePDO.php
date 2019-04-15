@@ -78,7 +78,7 @@ class SimplePDO
 
     public function exec(string $sql)
     {
-        $this->pdo->exec($sql);
+        $this->connect()->exec($sql);
     }
     
     public function execute(string $sql, array $params = null): int
