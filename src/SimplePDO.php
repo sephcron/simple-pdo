@@ -76,6 +76,11 @@ class SimplePDO
             $this->bindValue($stmt, $key, $param);
     }
 
+    public function exec(string $sql)
+    {
+        $this->pdo->exec($sql);
+    }
+    
     public function execute(string $sql, array $params = null): int
     {
         $stmt = $this->query($sql, $params);
