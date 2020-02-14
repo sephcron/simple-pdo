@@ -47,7 +47,7 @@ class SimplePDO
             $this->connected = true;
             
             if ($this->onConnectCallback)
-                $this->onConnectCallback($this);
+                ($this->onConnectCallback)($this);
         }
         
         return $this->pdo;
