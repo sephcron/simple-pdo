@@ -12,11 +12,17 @@ class SimplePDO
     protected $dsn;
     protected $options;
     protected $connected = false;
+    private $onConnectCallback;
     
     public function __construct(string $dsn, array $options = null)
     {
         $this->dsn      = $dsn;
         $this->options  = $options ?: [];
+    }
+    
+    public function onConnect(callable $callback)
+    {
+        $this->onConnectCallback = $callback;
     }
     
     public function connect()
@@ -39,6 +45,9 @@ class SimplePDO
             $this->pdo = new PDO($pdo_dsn, $username, $password, $this->options);
             
             $this->connected = true;
+            
+            if ($this->onConnectCallback)
+                $this->onConnectCallback($this);
         }
         
         return $this->pdo;
