@@ -12,8 +12,8 @@ class SimplePDO
     protected $dsn;
     protected $options;
     private $onConnectCallback;
-    private $reconnectTimeout;
-    private $connectionTimestamp;
+    private $reconnectInterval = 0;
+    private $connectionTimestamp = 0;
     
     public function __construct(string $dsn, array $options = null)
     {
@@ -26,14 +26,14 @@ class SimplePDO
         $this->onConnectCallback = $callback;
     }
     
-    public function setReconnectTimeout(int $value)
+    public function setReconnectInterval(int $value)
     {
-        $this->reconnectTimeout = $value;
+        $this->reconnectInterval = $value;
     }
     
     public function connect()
     {
-        if ($this->reconnectTimeout && ($this->reconnectTimeout + $this->connectionTimestamp) < time())
+        if ($this->pdo && $this->reconnectInterval > 0 && ($this->reconnectInterval + $this->connectionTimestamp) < time())
             $this->pdo = null;
             
         if (!$this->pdo)
