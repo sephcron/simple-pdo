@@ -8,11 +8,12 @@ use PDOStatement;
 class SimplePDO
 {   
     /** @var PDO */
-    protected $pdo;
+    protected $pdo = null;
     protected $dsn;
     protected $options;
-    protected $connected = false;
     private $onConnectCallback;
+    private $reconnectTimeout;
+    private $connectionTimestamp;
     
     public function __construct(string $dsn, array $options = null)
     {
@@ -25,9 +26,17 @@ class SimplePDO
         $this->onConnectCallback = $callback;
     }
     
+    public function setReconnectTimeout(int $value)
+    {
+        $this->reconnectTimeout = $value;
+    }
+    
     public function connect()
     {
-        if (!$this->connected)
+        if ($this->reconnectTimeout && ($this->reconnectTimeout + $this->connectionTimestamp) < time())
+            $this->pdo = null;
+            
+        if (!$this->pdo)
         {
             $url = parse_url($this->dsn);
         
@@ -43,8 +52,8 @@ class SimplePDO
             $password = $url['pass'] ?? null;
         
             $this->pdo = new PDO($pdo_dsn, $username, $password, $this->options);
-            
-            $this->connected = true;
+
+            $this->connectionTimestamp = time();
             
             if ($this->onConnectCallback)
                 ($this->onConnectCallback)($this);
