@@ -159,27 +159,89 @@ class SimplePDO
         return $stmt;
     }
     
-    public function queryScalar(string $sql, array $params = null)
+    private function flags(string $query_type, $result, $flags)
+    {
+        if (!$result)
+            return $result;
+        
+        if  (isset($flags['json']))
+            $result = $this->flag_json($query_type, $result, $flags['json']);
+        
+        return $result;
+    }
+    
+    private function flag_json(string $query_type, $result, $flag_value)
+    {        
+        $is_obj = ($this->options[\PDO::ATTR_DEFAULT_FETCH_MODE] ?? \PDO::FETCH_ASSOC) === \PDO::FETCH_OBJ;
+        
+        $decode_row = function ($row, $columns) use ($is_obj) 
+        {
+            foreach ($columns as $column)
+            {
+                if ($is_obj && isset($row->{$column}))
+                    $row->{$column} = json_decode($row->{$column});
+                else if (!$is_obj && isset($row[$column]))
+                    $row[$column] = json_decode($row[$column]);
+            }
+            
+            return $row;
+        };
+        
+        switch (strtolower($query_type))
+        {
+            case 'scalar':
+                if ($flag_value === true)
+                    $result = json_decode($result);
+                
+                break;
+                
+            case 'column':
+                if ($flag_value === true)
+                    foreach ($result as $row)
+                        $result = json_decode($result);
+                
+                break;
+            
+            case 'one':
+                $result = $decode_row($result, $flag_value);
+        
+                break;
+            
+            case 'all':
+                foreach ($result as $key => $row)
+                    $result[$key] = $decode_row($row, $flag_value);
+                
+                break;
+        }
+        
+        return $result;
+    }
+    
+    public function queryScalar(string $sql, array $params = null, array $flags = null)
     {
         $stmt = $this->query($sql, $params);
         $value = $stmt->fetchColumn(0);
         
-        return  $value === false ? null : $value;
+        $result = $value === false ? null : $value;
+        return $this->flags('scalar', $result, $flags);
     }
     
-    public function queryOne(string $sql, array $params = null)
+    public function queryOne(string $sql, array $params = null, array $flags = null)
     {
-        return $this->query($sql, $params)->fetch() ?: null;
+        $result = $this->query($sql, $params)->fetch() ?: null;
+        return $this->flags('one', $result, $flags);
     }
     
-    public function queryAll(string $sql, array $params = null)
+    public function queryAll(string $sql, array $params = null, array $flags = null)
     {
-        return $this->query($sql, $params)->fetchAll() ?: [];
+        $result = $this->query($sql, $params)->fetchAll() ?: [];
+        return $this->flags('all', $result, $flags);
     }
     
-    public function queryAllIndexed(string $sql, array $params = null)
+    public function queryAllIndexed(string $sql, array $params = null, array $flags = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: [];
+        $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: [];
+        return $this->flags('all', $result, $flags);
     }
     
     public function queryAllGroup(string $sql, array $params = null)
@@ -187,14 +249,16 @@ class SimplePDO
         return $this->query($sql, $params)->fetchAll(PDO::FETCH_GROUP) ?: [];
     }
     
-    public function queryColumn(string $sql, array $params = null)
+    public function queryColumn(string $sql, array $params = null, array $flags = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        return $this->flags('column', $result, $flags);
     }
     
-    public function queryColumnIndexed(string $sql, array $params = null)
+    public function queryColumnIndexed(string $sql, array $params = null, array $flags = null)
     {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        return $this->flags('column', $result, $flags);
     }
     
     public function utilIndexByColumn(array &$result, string $column)
