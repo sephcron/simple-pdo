@@ -9,7 +9,7 @@ Deve ser fornecida uma string de conexão em formato URI além de outras opçõe
 `mysql://{username}:{password}@{host}:{port}/{dbname}?{params}`
 
 ```php
-$dsn = mysql://username:pa$$w0rd@127.0.0.1:3306/testdb?charset=utf8mb4;
+$dsn = 'mysql://username:pa$$w0rd@127.0.0.1:3306/testdb?charset=utf8mb4';
 
 $pdo = new SimplePDO($dsn, [
     \PDO::MYSQL_ATTR_INIT_COMMAND    => "SET NAMES 'utf8mb4', SESSION sql_mode = 'TRADITIONAL'",
