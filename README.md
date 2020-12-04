@@ -1,6 +1,6 @@
 # simple-pdo
 
-Este projeto tem como objetivo simplificar ao máximo a utilização das classses PDO.
+Este projeto tem como objetivo simplificar a utilização das classes PDO.
 
 ## Conexão
 
