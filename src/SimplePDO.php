@@ -62,6 +62,11 @@ class SimplePDO
         return $this->pdo;
     }
     
+    public function close()
+    {
+        $this->pdo = null;
+    }
+    
     public function lastInsertId(string $name = null)
     {
         return $this->pdo->lastInsertId($name);
