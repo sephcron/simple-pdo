@@ -106,6 +106,9 @@ class SimplePDO
     
     public function execute(string $sql, array $params = null): int
     {
+        if (!$params)
+            return $this->connect()->exec($sql);
+        
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
