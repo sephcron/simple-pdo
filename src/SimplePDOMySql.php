@@ -13,6 +13,9 @@ class SimplePDOMySql extends SimplePDO
         
         if (is_string($value) && $value === '')
             $value = null;
+        
+        if ($value instanceof \DateTime)
+            $value = $value->format('Y-m-d H:i:s');
 
         parent::bindValue($stmt, $parameter, $value);
     }

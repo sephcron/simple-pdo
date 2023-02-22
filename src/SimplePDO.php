@@ -99,10 +99,10 @@ class SimplePDO
             $this->bindValue($stmt, $key, $param);
     }
 
-    public function exec(string $sql)
-    {
-        $this->connect()->exec($sql);
-    }
+//    public function exec(string $sql)
+//    {
+//        $this->connect()->exec($sql);
+//    }
     
     public function execute(string $sql, array $params = null): int
     {
@@ -266,13 +266,13 @@ class SimplePDO
         return $this->flags('column', $result, $flags);
     }
     
-    public function utilIndexByColumn(array &$result, string $column)
-    {
-        $new = [];
-        
-        foreach ($result as $row)
-            $new[$row->{$column}] = $row;
-            
-        $result = $new;
-    }
+//    public function utilIndexByColumn(array &$result, string $column)
+//    {
+//        $new = [];
+//        
+//        foreach ($result as $row)
+//            $new[$row->{$column}] = $row;
+//            
+//        $result = $new;
+//    }
 }
