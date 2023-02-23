@@ -33,24 +33,12 @@ class SimplePDOMySql extends SimplePDO
         foreach ($params as $param_array)
         {
             $values = array();
-
-            //if (is_object($param_array))
-            //    $param_array = (array)$param_array;
             
             foreach ($param_array as $key => $param)
             {
-                if ($param instanceof DateTime)
-                    $param = $param->format('Y-m-d H:i:s');
-                
-                if (substr($key, 0, 1) === '_')
-                    $values[] = $param;
-                
-                else
-                {
-                    $new_key = $key . '_' . $index;
-                    $new_params[$new_key] = $param;
-                    $values[] = $new_key;
-                }
+                $new_key = $key . '_' . $index;
+                $new_params[$new_key] = $param;
+                $values[] = $new_key;
             }
 
             $new_values[] = '(' . implode(',', $values) . ')';
@@ -60,6 +48,6 @@ class SimplePDOMySql extends SimplePDO
 
         $new_sql = str_replace(':VALUES', implode(',', $new_values), $sql);
         
-        return $this->connect()->prepare($new_sql)->execute($new_params);
+        return $this->execute($new_sql, $new_params);
     }
 }
