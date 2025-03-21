@@ -15,7 +15,7 @@ class SimplePDO
     private $reconnectInterval = 0;
     private $connectionTimestamp = 0;
     
-    public function __construct(string $dsn, array $options = null)
+    public function __construct(string $dsn, ?array $options = null)
     {
         $this->dsn      = $dsn;
         $this->options  = $options ?: [];
@@ -67,7 +67,7 @@ class SimplePDO
         $this->pdo = null;
     }
     
-    public function lastInsertId(string $name = null)
+    public function lastInsertId(?string $name = null)
     {
         return $this->pdo->lastInsertId($name);
     }
@@ -88,6 +88,10 @@ class SimplePDO
         else
         if (is_null($value))
             $stmt->bindValue($parameter, $value, PDO::PARAM_NULL);
+        
+        else
+        if (is_object($value))
+            $stmt->bindValue($parameter, json_encode($value), PDO::PARAM_STR);
 
         else 
             $stmt->bindValue($parameter, $value);
@@ -98,13 +102,8 @@ class SimplePDO
         foreach ($params as $key => $param)
             $this->bindValue($stmt, $key, $param);
     }
-
-//    public function exec(string $sql)
-//    {
-//        $this->connect()->exec($sql);
-//    }
     
-    public function execute(string $sql, array $params = null): int
+    public function execute(string $sql, ?array $params = null): int
     {
         if (!$params)
             return $this->connect()->exec($sql);
@@ -156,7 +155,7 @@ class SimplePDO
         return $results;
     }
     
-    public function query(string $sql, array $params = null): PDOStatement
+    public function query(string $sql, ?array $params = null): PDOStatement
     {
         $stmt = $this->connect()->prepare($sql);
 
@@ -172,7 +171,7 @@ class SimplePDO
         if (!$result)
             return $result;
         
-        if  (isset($flags['json']))
+        if  (array_key_exists($flags['json']))
             $result = $this->flag_json($query_type, $result, $flags['json']);
         
         return $result;
@@ -225,7 +224,7 @@ class SimplePDO
         return $result;
     }
     
-    public function queryScalar(string $sql, array $params = null, array $flags = null)
+    public function queryScalar(string $sql, ?array $params = null, ?array $flags = null)
     {
         $stmt = $this->query($sql, $params);
         $value = $stmt->fetchColumn(0);
@@ -234,48 +233,38 @@ class SimplePDO
         return $this->flags('scalar', $result, $flags);
     }
     
-    public function queryOne(string $sql, array $params = null, array $flags = null)
+    public function queryOne(string $sql, ?array $params = null, ?array $flags = null)
     {
         $result = $this->query($sql, $params)->fetch() ?: null;
         return $this->flags('one', $result, $flags);
     }
     
-    public function queryAll(string $sql, array $params = null, array $flags = null)
+    public function queryAll(string $sql, ?array $params = null, ?array $flags = null)
     {
         $result = $this->query($sql, $params)->fetchAll() ?: [];
         return $this->flags('all', $result, $flags);
     }
     
-    public function queryAllIndexed(string $sql, array $params = null, array $flags = null)
+    public function queryAllIndexed(string $sql, ?array $params = null, ?array $flags = null)
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: [];
         return $this->flags('all', $result, $flags);
     }
     
-    public function queryAllGroup(string $sql, array $params = null)
+    public function queryAllGroup(string $sql, ?array $params = null)
     {
         return $this->query($sql, $params)->fetchAll(PDO::FETCH_GROUP) ?: [];
     }
     
-    public function queryColumn(string $sql, array $params = null, array $flags = null)
+    public function queryColumn(string $sql, ?array $params = null, ?array $flags = null)
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: [];
         return $this->flags('column', $result, $flags);
     }
     
-    public function queryColumnIndexed(string $sql, array $params = null, array $flags = null)
+    public function queryColumnIndexed(string $sql, ?array $params = null, ?array $flags = null)
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
         return $this->flags('column', $result, $flags);
     }
-    
-//    public function utilIndexByColumn(array &$result, string $column)
-//    {
-//        $new = [];
-//        
-//        foreach ($result as $row)
-//            $new[$row->{$column}] = $row;
-//            
-//        $result = $new;
-//    }
 }

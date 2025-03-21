@@ -11,7 +11,7 @@ class SimplePDOMySql extends SimplePDO
         if (is_bool($value))
             $value = $value ? 1 : 0;
         
-        if (is_string($value) && $value === '')
+        if (is_string($value) && trim($value) === '')
             $value = null;
         
         if ($value instanceof \DateTime)
