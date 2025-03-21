@@ -6,7 +6,7 @@ use PDOStatement;
 
 class SimplePDOMySql extends SimplePDO
 {
-    public function bindValue(PDOStatement $stmt, string $parameter, $value)
+    public function bindValue(PDOStatement $stmt, string $parameter, $value): void
     {
         if (is_bool($value))
             $value = $value ? 1 : 0;
