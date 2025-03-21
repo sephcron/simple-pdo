@@ -74,8 +74,12 @@ class SimplePDO
     
     public function bindValue(PDOStatement $stmt, string $parameter, $value): void
     {
-        if ($value instanceof \UnitEnum)
+        if ($value instanceof \BackedEnum)
             $value = $value->value;
+        
+        else
+        if ($value instanceof \UnitEnum)
+            $value = $value->name;
         
         if (is_int($value))
             $stmt->bindValue($parameter, $value, PDO::PARAM_INT);
