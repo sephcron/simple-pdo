@@ -20,7 +20,7 @@ class SimplePDOMySql extends SimplePDO
         parent::bindValue($stmt, $parameter, $value);
     }
     
-    public function insertMultiple(string $sql, array $params): void
+    public function insertMultiple(string $sql, array $params): int
     {
         if (!$params)
             return 0;

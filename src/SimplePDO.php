@@ -112,30 +112,34 @@ class SimplePDO
         return $stmt->rowCount();
     }
 
-    public function executeMultiple(string $sql, array $params): void
+    public function executeMultiple(string $sql, array $params): int
     {
         if (empty($params))
-            return;
+            return 0;
         
         $stmt = $this->connect()->prepare($sql);
 
+        $affectedRows = 0;
+        
         foreach ($params as $param_array)
         {
             foreach ($param_array as $key => $param)
                 $this->bindValue($stmt, $key, $param);
 
-            $stmt->execute();
+            $affectedRows += $stmt->execute();
         }
+        
+        return $affectedRows;
     }
     
-    public function insertMultiple(string $sql, array $params): void
+    public function insertMultiple(string $sql, array $params): int
     {
-        $this->executeMultiple($sql, $params);
+        return $this->executeMultiple($sql, $params);
     }
     
-    public function updateMultiple(string $sql, array $params): void
+    public function updateMultiple(string $sql, array $params): int
     {
-        $this->executeMultiple($sql, $params);
+        return $this->executeMultiple($sql, $params);
     }
     
     public function executeProcedure(string $name, array $params): array
