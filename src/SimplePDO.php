@@ -15,10 +15,10 @@ class SimplePDO
     private $reconnectInterval = 0;
     private $connectionTimestamp = 0;
     
-    public function __construct(string $dsn, ?array $options = null)
+    public function __construct(string $dsn, array $options = [])
     {
         $this->dsn      = $dsn;
-        $this->options  = $options ?: [];
+        $this->options  = $options;
     }
     
     public function onConnect(callable $callback)
@@ -62,7 +62,7 @@ class SimplePDO
         return $this->pdo;
     }
     
-    public function close()
+    public function close(): void
     {
         $this->pdo = null;
     }
@@ -72,7 +72,7 @@ class SimplePDO
         return $this->pdo->lastInsertId($name);
     }
     
-    public function bindValue(PDOStatement $stmt, string $parameter, $value)
+    public function bindValue(PDOStatement $stmt, string $parameter, $value): void
     {
         if (is_int($value))
             $stmt->bindValue($parameter, $value, PDO::PARAM_INT);
@@ -97,24 +97,24 @@ class SimplePDO
             $stmt->bindValue($parameter, $value);
     }
 
-    public function bindValues(PDOStatement $stmt, array $params)
+    public function bindValues(PDOStatement $stmt, array $params): void
     {
         foreach ($params as $key => $param)
             $this->bindValue($stmt, $key, $param);
     }
     
-    public function execute(string $sql, ?array $params = null): int
+    public function execute(string $sql, array $params = []): int
     {
-        if (!$params)
+        if (empty($params))
             return $this->connect()->exec($sql);
         
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 
-    public function executeMultiple(string $sql, array $params)
+    public function executeMultiple(string $sql, array $params): void
     {
-        if (!$params)
+        if (empty($params))
             return;
         
         $stmt = $this->connect()->prepare($sql);
@@ -128,17 +128,17 @@ class SimplePDO
         }
     }
     
-    public function insertMultiple(string $sql, array $params)
+    public function insertMultiple(string $sql, array $params): void
     {
         $this->executeMultiple($sql, $params);
     }
     
-    public function updateMultiple(string $sql, array $params)
+    public function updateMultiple(string $sql, array $params): void
     {
         $this->executeMultiple($sql, $params);
     }
     
-    public function executeProcedure(string $name, array $params)
+    public function executeProcedure(string $name, array $params): array
     {
         $sql = "CALL $name(" . implode(', ', array_keys($params)) . ")";
         
@@ -155,29 +155,29 @@ class SimplePDO
         return $results;
     }
     
-    public function query(string $sql, ?array $params = null): PDOStatement
+    public function query(string $sql, array $params = []): PDOStatement
     {
         $stmt = $this->connect()->prepare($sql);
 
-        if ($params !== null)
+        if (!empty($params))
             $this->bindValues($stmt, $params);
 
         $stmt->execute();
         return $stmt;
     }
     
-    private function flags(string $query_type, $result, $flags)
+    private function flags(string $queryType, $result, array $flags = [])
     {
         if (!$result)
             return $result;
         
-        if  (array_key_exists($flags['json']))
-            $result = $this->flag_json($query_type, $result, $flags['json']);
+        if  (array_key_exists('json', $flags))
+            $result = $this->flagJson($queryType, $result, $flags['json']);
         
         return $result;
     }
     
-    private function flag_json(string $query_type, $result, $flag_value)
+    private function flagJson(string $queryType, $result, $flagValue)
     {        
         $is_obj = ($this->options[\PDO::ATTR_DEFAULT_FETCH_MODE] ?? \PDO::FETCH_ASSOC) === \PDO::FETCH_OBJ;
         
@@ -194,29 +194,29 @@ class SimplePDO
             return $row;
         };
         
-        switch (strtolower($query_type))
+        switch (strtolower($queryType))
         {
             case 'scalar':
-                if ($flag_value === true)
+                if ($flagValue === true)
                     $result = json_decode($result);
                 
                 break;
                 
             case 'column':
-                if ($flag_value === true)
+                if ($flagValue === true)
                     foreach ($result as $row)
                         $result = json_decode($result);
                 
                 break;
             
             case 'one':
-                $result = $decode_row($result, $flag_value);
+                $result = $decode_row($result, $flagValue);
         
                 break;
             
             case 'all':
                 foreach ($result as $key => $row)
-                    $result[$key] = $decode_row($row, $flag_value);
+                    $result[$key] = $decode_row($row, $flagValue);
                 
                 break;
         }
@@ -224,7 +224,7 @@ class SimplePDO
         return $result;
     }
     
-    public function queryScalar(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryScalar(string $sql, array $params = [], array $flags = []): mixed
     {
         $stmt = $this->query($sql, $params);
         $value = $stmt->fetchColumn(0);
@@ -233,36 +233,36 @@ class SimplePDO
         return $this->flags('scalar', $result, $flags);
     }
     
-    public function queryOne(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryOne(string $sql, array $params = [], array $flags = []): ?object
     {
         $result = $this->query($sql, $params)->fetch() ?: null;
         return $this->flags('one', $result, $flags);
     }
     
-    public function queryAll(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryAll(string $sql, array $params = [], array $flags = []): array
     {
         $result = $this->query($sql, $params)->fetchAll() ?: [];
         return $this->flags('all', $result, $flags);
     }
     
-    public function queryAllIndexed(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryAllIndexed(string $sql, array $params = [], array $flags = []): array
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_UNIQUE) ?: [];
         return $this->flags('all', $result, $flags);
     }
     
-    public function queryAllGroup(string $sql, ?array $params = null)
+    public function queryAllGroup(string $sql, array $params = []): array
     {
         return $this->query($sql, $params)->fetchAll(PDO::FETCH_GROUP) ?: [];
     }
     
-    public function queryColumn(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryColumn(string $sql, array $params = [], array $flags = []): array
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_COLUMN) ?: [];
         return $this->flags('column', $result, $flags);
     }
     
-    public function queryColumnIndexed(string $sql, ?array $params = null, ?array $flags = null)
+    public function queryColumnIndexed(string $sql, array $params = [], array $flags = []): array
     {
         $result = $this->query($sql, $params)->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
         return $this->flags('column', $result, $flags);
